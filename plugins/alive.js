@@ -1,51 +1,195 @@
-const { cmd, commands } = require('../command');
-const os = require("os");
-const { runtime } = require('../lib/functions'); // Make sure this path is correct and the function is exported
+const config = require('../config')
+const os = require('os')
+const {
+    cmd,
+    commands
+} = require('../command')
+const {
+    getBuffer,
+    getGroupAdmins,
+    getRandom,
+    h2k,
+    isUrl,
+    Json,
+    runtime,
+    sleep,
+    fetchJson
+} = require('../lib/functions')
+cmd({
+        pattern: "alive2",
+        react: "🍬",
+        alias: ["online", "test", "bot"],
+        desc: "Check bot online or no.",
+        category: "other",
+        use: '.alive2',
+        filename: __filename
+    },
+    async (conn, mek, m, {
+        from,
+        prefix,
+        pushname,
+        reply
+    }) => {
+        try {
+            if (os.hostname().length == 12) hostname = 'replit'
+            else if (os.hostname().length == 36) hostname = 'heroku'
+            else if (os.hostname().length == 8) hostname = 'koyeb'
+            else hostname = os.hostname()
+            let monspace = '```'
+            const sssf = `${monspace}👋 Hello ${pushname} I'm alive now${monspace}
+
+*👾 Im HASHAN-MD whatsapp bot*
+    
+> *Version:* ${require("../package.json").version}
+> *Memory:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
+> *Runtime:* ${runtime(process.uptime())}
+> *Platform:* ${hostname}
+    
+*🍭 Have A Nice Day 🍭*`
+
+            let buttons = [{
+                    name: "cta_url",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: config.BTN,
+                        url: config.BTNURL,
+                        merchant_url: config.BTNURL
+                    }),
+                },
+                {
+                    name: "quick_reply",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: "Get Menu",
+                        id: ".menu"
+                    }),
+                }
+            ]
+            let opts = {
+                image: config.LOGO,
+                header: '',
+                footer: config.FOOTER,
+                body: sssf
+
+            }
+            return await conn.sendButtonMessage(from, buttons, m, opts)
+        } catch (e) {
+            reply('*Error !!*')
+            console.log(e)
+        }
+    })
 
 cmd({
-    pattern: "alive",
-    alias: ["status", "uptime"],
-    desc: "Check uptime and system status",
-    category: "main",
-    react: "👋",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        // Ensure 'pushname' is correctly populated from your bot's framework.
-        // If 'pushname' is sometimes undefined, you might want to provide a fallback, e.g., 'mek.pushName || "User"'.
-        const userPushName = pushname || "මිත්‍රයා"; // Fallback if pushname is not available
+        pattern: "ping2",
+        react: "📟",
+        alias: ["speed"],
+        desc: "Check bot\'s ping",
+        category: "other",
+        use: '.ping2',
+        filename: __filename
+    },
+    async (conn, mek, m, {
+        from,
+        reply
+    }) => {
+        try {
+            let inital = new Date().getTime();
+            let ping = await conn.sendMessage(from, {
+                text: '```Pinging... ⚡```'
+            }, {
+                quoted: mek
+            })
+            let final = new Date().getTime();
+            return await conn.edit(ping, '*Pong*\n *' + (final - inital) + ' ms* ')
+        } catch (e) {
+            reply('*Error !!*')
+            console.log(e)
+        }
+    })
 
-        // Generate system status message
-        const status = `> *👋 ʜᴇʟʟᴏ..${userPushName}, HASHAN-MD ɪs ᴀʟɪᴠᴇ ɴᴏᴡ !! 🧸*
+cmd({
+        pattern: "menu2",
+        react: "🗃️",
+        alias: ["panel", "list", "commands"],
+        desc: "Get bot\'s command list.",
+        category: "other",
+        use: '.menu2',
+        filename: __filename
+    },
+    async (conn, mek, m, {
+        from,
+        pushname,
+        reply
+    }) => {
+        try {
+            if (os.hostname().length == 12) hostname = 'replit'
+            else if (os.hostname().length == 36) hostname = 'heroku'
+            else if (os.hostname().length == 8) hostname = 'koyeb'
+            else hostname = os.hostname()
+            let monspace = '```'
+            const MNG = `${monspace}👋 Hello ${pushname}${monspace}
 
-*ʜᴇʟʟᴏ 👋 , ɪᴍ HASHAN-MD !! ʜᴏᴡ ᴄᴀɴ ɪ ʜᴇʟᴘ ʏᴏᴜ ᴛᴏᴅᴀʏ 😊*
+*👾 HASHAN-MD commands menu...*
+  
+> *Version:* ${require("../package.json").version}
+> *Memory:* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
+> *Runtime:* ${runtime(process.uptime())}
+> *Platform:* ${hostname}`
+            const categories = [];
+            const categoryMap = new Map();
 
-> *💤 ᴠᴇʀsɪᴏɴ  :* 0.0.1 ᴠ 
-> *✨ ʜᴏsᴛ    :* ${os.hostname()}
-> *⏰ ᴜᴘᴛɪᴍᴇ  :* ${runtime(process.uptime())}
-> *📶 ᴍᴇᴍᴏʀʏ   :* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-
-> *© POWERED BY HASHAN-MD 🤍*`;
-
-        // Send the status message with an image
-        await conn.sendMessage(from, { 
-            image: { url: `https://res.cloudinary.com/df2rnoijw/image/upload/v1752404824/shkqo3nbxkhhbyej2lxm.jpg` },  // Ensure this URL is always accessible
-            caption: status,
-            contextInfo: {
-                mentionedJid: [m.sender], // Ensure m.sender is always a valid JID
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363369981563818@newsletter', // This JID needs to be valid and accessible
-                    newsletterName: 'HASHAN-MD-V1',
-                    serverMessageId: 143
+            for (let i = 0; i < commands.length; i++) {
+                const cmd = commands[i];
+                if (!cmd.dontAddCommandList && cmd.pattern !== undefined) {
+                    const category = cmd.category.toUpperCase();
+                    if (!categoryMap.has(category)) {
+                        categories.push(category);
+                        categoryMap.set(category, []);
+                    }
+                    categoryMap.get(category).push(cmd.pattern);
                 }
             }
-        }, { quoted: mek });
+            const rows = []
+            for (const category of categories) {
 
-    } catch (e) {
-        console.error("Error in alive command:", e);
-        reply(`An error occurred: ${e.message}`);
-    }
-});
+                rows.push({
+                    header: '',
+                    title: `${category} MENU`,
+                    description: '',
+                    id: `.menu`
+                })
+
+            }
+            let buttons = [{
+                    name: "cta_url",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: config.BTN,
+                        url: config.BTNURL,
+                        merchant_url: config.BTNURL
+                    }),
+                },
+                {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                        title: 'Select a Category :)',
+                        sections: [{
+                            title: 'Please select a category',
+                            highlight_label: 'HASHAN-MD',
+                            rows: rows
+
+                        }]
+                    }),
+                }
+
+            ]
+            let opts = {
+                image: config.LOGO,
+                header: '',
+                footer: config.FOOTER,
+                body: MNG
+
+            }
+            return await conn.sendButtonMessage(from, buttons, m, opts)
+        } catch (e) {
+            reply('*Error !!*')
+            console.log(e)
+        }
+    })
