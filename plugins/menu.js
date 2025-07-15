@@ -7,7 +7,7 @@ const imageUrl = 'https://res.cloudinary.com/df2rnoijw/image/upload/v1752404824/
 
 cmd({
     pattern: "menu",
-    react: "⚡",
+    react: "✅",
     alias: ["panel", "commands"],
     desc: "බොට් විධාන ලැයිස්තුව ලබා ගන්න",
     category: "main",
